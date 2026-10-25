@@ -6,6 +6,7 @@ import { versJour, versHeure, ajouterJours, dateCourte, heureLisible, majuscule 
 import { ALERTE_APPAREIL_HEURES, VERSION } from '../config.js';
 import FormulaireRdv, { REPETITIONS } from './FormulaireRdv.jsx';
 import AffichageMaman from '../maman/AffichageMaman.jsx';
+import { extraireJeton, jetonDepuisAdresse } from '../lib/jeton.js';
 import './aidant.css';
 
 const CLE_JETON = 'apaidant:jeton-aidant';
@@ -14,13 +15,12 @@ const lireLocal = (c) => { try { return localStorage.getItem(c); } catch { retur
 const ecrireLocal = (c, v) => { try { localStorage.setItem(c, v); } catch { /* ignoré */ } };
 
 function jetonInitial() {
-  const depuisLien = window.location.hash.slice(1);
-  if (depuisLien.length >= 32) {
+  const depuisLien = jetonDepuisAdresse('/aidant');
+  if (depuisLien) {
     ecrireLocal(CLE_JETON, depuisLien);
-    window.history.replaceState(null, '', '/aidant');
     return depuisLien;
   }
-  return lireLocal(CLE_JETON);
+  return extraireJeton(lireLocal(CLE_JETON));
 }
 
 const ONGLETS = [
@@ -33,12 +33,13 @@ const ONGLETS = [
 ];
 
 export default function EspaceAidant() {
-  const [jeton] = useState(jetonInitial);
+  const [jeton, setJeton] = useState(jetonInitial);
   const [nom, setNom] = useState(() => lireLocal(CLE_NOM) || '');
   const [etat, setEtat] = useState(null);
   const [erreurAcces, setErreurAcces] = useState('');
   const [onglet, setOnglet] = useState('rdv');
   const [message, setMessage] = useState(null);
+  const [essai, setEssai] = useState(0); // force un rechargement quand un lien est (re)saisi
 
   const informer = useCallback((texte, type = 'succes') => {
     setMessage({ texte, type, id: Date.now() });
@@ -48,6 +49,16 @@ export default function EspaceAidant() {
     const t = setTimeout(() => setMessage(null), 4000);
     return () => clearTimeout(t);
   }, [message]);
+
+  // Lien collé dans la barre d'adresse alors que la page est déjà ouverte
+  useEffect(() => {
+    const surChangement = () => {
+      const j = jetonDepuisAdresse('/aidant');
+      if (j) { ecrireLocal(CLE_JETON, j); setErreurAcces(''); setJeton(j); setEssai((n) => n + 1); }
+    };
+    window.addEventListener('hashchange', surChangement);
+    return () => window.removeEventListener('hashchange', surChangement);
+  }, []);
 
   const recharger = useCallback(async () => {
     if (!jeton) return;
@@ -65,7 +76,7 @@ export default function EspaceAidant() {
     const auRetour = () => { if (document.visibilityState === 'visible') recharger(); };
     document.addEventListener('visibilitychange', auRetour);
     return () => document.removeEventListener('visibilitychange', auRetour);
-  }, [recharger]);
+  }, [recharger, essai]);
 
   // Exécute une modification puis recharge l'état.
   const agir = useCallback(async (fn, succes) => {
@@ -81,19 +92,16 @@ export default function EspaceAidant() {
     }
   }, [informer, recharger]);
 
-  if (!jeton) {
+  const utiliserLien = (j) => { ecrireLocal(CLE_JETON, j); setErreurAcces(''); setJeton(j); setEssai((n) => n + 1); };
+
+  if (!jeton || erreurAcces) {
     return (
       <main className="aidant aidant--etroit">
         <h1>Espace aidant</h1>
-        <p>Pour accéder à cet espace, ouvrez le lien d'accès que l'administrateur vous a transmis.</p>
-      </main>
-    );
-  }
-  if (erreurAcces) {
-    return (
-      <main className="aidant aidant--etroit">
-        <h1>Espace aidant</h1>
-        <p className="alerte">{erreurAcces}</p>
+        {erreurAcces
+          ? <p className="alerte">{erreurAcces}</p>
+          : <p>Pour accéder à cet espace, ouvrez le lien d'accès que l'administrateur vous a transmis.</p>}
+        <SaisieLien onValider={utiliserLien} />
       </main>
     );
   }
@@ -146,6 +154,26 @@ export default function EspaceAidant() {
 function enAlerte(appareil) {
   if (!appareil.derniere_synchro) return true;
   return Date.now() - new Date(appareil.derniere_synchro).getTime() > ALERTE_APPAREIL_HEURES * 3600 * 1000;
+}
+
+export function SaisieLien({ onValider, libelle = "Ou collez ici le lien d'accès (ou le code seul)" }) {
+  const [texte, setTexte] = useState('');
+  const [erreur, setErreur] = useState('');
+  return (
+    <form className="formulaire" onSubmit={(e) => {
+      e.preventDefault();
+      const j = extraireJeton(texte);
+      if (j) onValider(j);
+      else setErreur("Ce lien est incomplet : il doit se terminer par un code de 64 caractères (chiffres et lettres a à f).");
+    }}>
+      <label>{libelle}
+        <textarea value={texte} onChange={(e) => { setTexte(e.target.value); setErreur(''); }} rows={3}
+          autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} />
+      </label>
+      {erreur && <p className="alerte" role="alert">{erreur}</p>}
+      <div className="actions"><button className="bouton bouton--principal" disabled={!texte.trim()}>Valider</button></div>
+    </form>
+  );
 }
 
 function SaisieNom({ onValider, initial = '', libelleBouton = 'Continuer' }) {
