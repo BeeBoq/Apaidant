@@ -1,0 +1,26 @@
+{
+  "name": "apaidant",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Page Maman : heure, rendez-vous du jour et note des aidants, sur une tablette fixe.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:sql": "node tests/schema.mjs",
+    "test:e2e": "node tests/e2e.mjs captures"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.17",
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "5.4.11",
+    "vite-plugin-pwa": "0.21.1",
+    "vitest": "2.1.8"
+  }
+}
