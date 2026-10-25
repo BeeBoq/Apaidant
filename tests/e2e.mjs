@@ -50,7 +50,14 @@ const pA = await ctxA.newPage();
 pA.on('pageerror', (e) => erreursConsole.push('aidant: ' + e.message));
 await pA.clock.install({ time: new Date('2026-10-26T08:00:00+01:00') });
 await ctxA.route('**/rest/v1/rpc/**', backend);
-await pA.goto(`${base}/aidant#${jA}`);
+// Lien sans code : la page propose de coller le lien (ici avec guillemets et espace)
+await pA.goto(`${base}/aidant`);
+await pA.getByText("ouvrez le lien d'accès").waitFor();
+await pA.locator('textarea').fill(`"https://pagemamanfamille.netlify.app/aidant# ${jA}" `);
+await pA.getByRole('button', { name: 'Valider' }).click();
+await pA.getByLabel('Votre prénom').waitFor();
+// Lien direct, code en majuscules
+await pA.goto(`${base}/aidant#${jA.toUpperCase()}`);
 await pA.getByLabel('Votre prénom').fill('Sophie');
 await pA.getByRole('button', { name: 'Continuer' }).click();
 assert.ok(!(await pA.evaluate(() => location.hash)), 'jeton retiré de la barre d’adresse');
