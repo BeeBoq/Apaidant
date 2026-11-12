@@ -53,7 +53,8 @@
 .vide { color: var(--doux); }
 
 .jour { margin-bottom: 18px; }
-.jour h3 { color: var(--doux); font-size: 0.95rem; text-transform: none; margin-bottom: 6px; }
+.jour h3 { color: var(--texte); font-size: 0.95rem; margin-bottom: 6px; padding: 4px 10px;
+           border-left: 8px solid var(--jour-vive, var(--trait)); background: var(--jour-teinte, transparent); border-radius: 6px; }
 .occurrences { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .occurrence { width: 100%; display: flex; gap: 14px; align-items: flex-start; text-align: left; font: inherit; color: inherit;
               background: var(--carte); border: 1px solid var(--trait); border-radius: 10px; padding: 12px 14px; cursor: pointer; }

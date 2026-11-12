@@ -7,8 +7,8 @@ export const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY || 'sb_publishable
 export const VERSION = typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
 
 // Fréquence de récupération des données sur les appareils de la personne aidée.
-// 10 min garantit le critère « moins de 15 minutes » avec de la marge.
-export const INTERVALLE_SYNCHRO_MS = 10 * 60 * 1000;
+// 1 min : 2 appareils ≈ 90 000 requêtes/mois, très en deçà des limites Supabase (requêtes illimitées, 5 Go de trafic).
+export const INTERVALLE_SYNCHRO_MS = 60 * 1000;
 
 // Au-delà de ce délai sans synchronisation, les aidants sont alertés (F13).
 export const ALERTE_APPAREIL_HEURES = 48;
