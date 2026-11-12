@@ -153,10 +153,11 @@ export default function AffichageMaman({ maintenant, donnees, apercu = false, no
         </section>
       </div>
       {nonRelie && (
-        <p className="maman__non-relie">
-          Cet appareil n'est pas relié : il n'affiche ni les rendez-vous ni la note.
-          Ouvrez son lien d'appairage, ou utilisez l'onglet Aperçu de l'espace aidant.
-        </p>
+        <div className="maman__non-relie">
+          <p>Cet appareil n'est pas relié : il n'affiche ni les rendez-vous ni la note.</p>
+          {/* Visible seulement avant l'appairage : une fois relié, la page n'a plus aucun bouton (F5). */}
+          {!apercu && <a className="maman__relier" href="/appairer">Relier cet appareil</a>}
+        </div>
       )}
     </div>
   );

@@ -31,3 +31,11 @@ export function appliquerSiLaNuit(maintenant = new Date()) {
     appliquer(true);
   }
 }
+
+// Appareil pas encore relié : rien d'important à l'écran, on applique sans attendre la nuit.
+export function appliquerSansAttendre() {
+  if (miseAJourEnAttente && appliquer) {
+    miseAJourEnAttente = false;
+    appliquer(true);
+  }
+}
