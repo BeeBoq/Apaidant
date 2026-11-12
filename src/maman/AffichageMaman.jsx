@@ -125,11 +125,11 @@ export default function AffichageMaman({ maintenant, donnees, apercu = false, no
           </div>
 
           <ul className="semaine">
-            {suivants.map(({ jour: j, rdvs }) => {
+            {suivants.map(({ jour: j, rdvs }, i) => {
               const affiches = rdvs.slice(0, maxParJour);
               const reste = rdvs.length - affiches.length;
               return (
-                <li key={j} className="semaine__jour" style={styleJour(jourSemaine(j))}>
+                <li key={j} className="semaine__jour" style={styleJour(jourSemaine(j), i + 1)}>
                   <span className="semaine__nom">
                     {j === ajouterJours(jour, 1) ? 'Demain' : majuscule(nomJour(j))}
                     <span className="semaine__num"> {decomposer(j).j === 1 ? '1er' : decomposer(j).j}</span>
@@ -152,7 +152,12 @@ export default function AffichageMaman({ maintenant, donnees, apercu = false, no
           </ul>
         </section>
       </div>
-      {nonRelie && <p className="maman__non-relie">Appareil à relier</p>}
+      {nonRelie && (
+        <p className="maman__non-relie">
+          Cet appareil n'est pas relié : il n'affiche ni les rendez-vous ni la note.
+          Ouvrez son lien d'appairage, ou utilisez l'onglet Aperçu de l'espace aidant.
+        </p>
+      )}
     </div>
   );
 }
