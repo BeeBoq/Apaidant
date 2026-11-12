@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as api from '../lib/api.js';
 import { occurrencesEntre } from '../lib/recurrence.js';
-import { versJour, versHeure, ajouterJours, dateCourte, heureLisible, majuscule } from '../lib/dates.js';
+import { versJour, versHeure, ajouterJours, dateCourte, heureLisible, majuscule, jourSemaine } from '../lib/dates.js';
+import { styleJour } from '../lib/couleurs.js';
 import { ALERTE_APPAREIL_HEURES, VERSION } from '../config.js';
 import FormulaireRdv, { REPETITIONS } from './FormulaireRdv.jsx';
 import AffichageMaman from '../maman/AffichageMaman.jsx';
@@ -249,7 +250,7 @@ function OngletRdv({ etat, jeton, nom, agir }) {
       {jours.length === 0 && <p className="vide">Aucun rendez-vous dans les {horizon} prochains jours.</p>}
 
       {jours.map(({ jour, occurrences }) => (
-        <div key={jour} className="jour">
+        <div key={jour} className="jour" style={styleJour(jourSemaine(jour))}>
           <h3>{libelleJour(jour, aujourdhui)}</h3>
           <ul className="occurrences">
             {occurrences.map((o) => (

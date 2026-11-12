@@ -1,53 +1,66 @@
-// Affichage pur de la page Maman, à partir d'une heure et de données.
+// Affichage pur de la page Maman (version 2 : semaine glissante).
 // Utilisé par la page elle-même et par l'aperçu de l'espace aidant (F12).
 import { useLayoutEffect, useRef, useState } from 'react';
 import { occurrencesDuJour, etatsSelonHeure } from '../lib/recurrence.js';
 import { versJour, versHeure, nomJour, dateLongue, horlogeLisible, heureLisible,
-  momentDeLaJournee, majuscule } from '../lib/dates.js';
+  momentDeLaJournee, majuscule, ajouterJours, jourSemaine, decomposer } from '../lib/dates.js';
+import { styleJour } from '../lib/couleurs.js';
 import './maman.css';
 
+export const NB_JOURS = 7; // aujourd'hui + les 6 jours suivants
+
 // Pas de défilement possible : si le contenu ne tient pas, on réduit par paliers.
-//   1 : on ne garde que le dernier rendez-vous passé
-//   2 : on retire tous les rendez-vous passés
-//   3 : rendez-vous en taille réduite
-//   4 : note en taille réduite
-const NIVEAU_MAX = 4;
+const PALIERS = [
+  'complet',
+  'un-seul-passe',     // aujourd'hui : on ne garde que le dernier rendez-vous passé
+  'aucun-passe',       // aujourd'hui : on retire les rendez-vous passés
+  'semaine-resumee',   // jours suivants : 1 rendez-vous affiché + « et 2 autres »
+  'aujourdhui-dense',  // aujourd'hui : rendez-vous en taille réduite
+  'semaine-dense',     // jours suivants : taille réduite
+  'note-reduite',      // note en taille réduite
+];
 
 function deborde(el) {
-  return el && el.scrollHeight > el.clientHeight + 1;
+  return Boolean(el) && el.scrollHeight > el.clientHeight + 1;
 }
 
 export default function AffichageMaman({ maintenant, donnees, apercu = false, nonRelie = false }) {
   const jour = versJour(maintenant);
-  const tous = etatsSelonHeure(
+  const aujourdhui = etatsSelonHeure(
     occurrencesDuJour(donnees?.rdvs, donnees?.exceptions, jour),
     versHeure(maintenant),
   );
+  const suivants = Array.from({ length: NB_JOURS - 1 }, (_, i) => {
+    const j = ajouterJours(jour, i + 1);
+    return { jour: j, rdvs: occurrencesDuJour(donnees?.rdvs, donnees?.exceptions, j) };
+  });
   const note = donnees?.note;
   const aUneNote = Boolean(note?.titre?.trim() || note?.texte?.trim());
 
+  // --- Ajustement automatique à l'écran ---
   const racine = useRef(null);
   const [taille, setTaille] = useState('');
-  const signature = `${taille}|${tous.map((r) => r.cle + r.etat).join(',')}|${note?.titre}|${note?.texte}`;
+  const signature = [taille, jour, aujourdhui.map((r) => r.cle + r.etat).join(','),
+    suivants.map((s) => s.rdvs.map((r) => r.cle).join(',')).join('|'), note?.titre, note?.texte].join('#');
   const [reduction, setReduction] = useState({ signature, niveau: 0 });
   const niveau = reduction.signature === signature ? reduction.niveau : 0;
+  const palier = (nom) => niveau >= PALIERS.indexOf(nom);
 
-  let rdvs = tous;
-  const passes = tous.filter((r) => r.etat === 'passe');
-  if (niveau >= 1 && passes.length > 1) rdvs = tous.filter((r) => r.etat !== 'passe' || r === passes[passes.length - 1]);
-  if (niveau >= 2) rdvs = tous.filter((r) => r.etat !== 'passe');
-  const densite = niveau >= 3 || rdvs.length >= 5 ? 'dense' : rdvs.length >= 4 ? 'moyen' : '';
+  let rdvsJour = aujourdhui;
+  const passes = aujourdhui.filter((r) => r.etat === 'passe');
+  if (palier('un-seul-passe') && passes.length > 1) {
+    rdvsJour = aujourdhui.filter((r) => r.etat !== 'passe' || r === passes[passes.length - 1]);
+  }
+  if (palier('aucun-passe')) rdvsJour = aujourdhui.filter((r) => r.etat !== 'passe');
+  const maxParJour = palier('semaine-resumee') ? 1 : 2;
 
-  // Mesure après affichage : si quelque chose déborde, palier suivant.
   useLayoutEffect(() => {
     const el = racine.current;
-    if (!el || niveau >= NIVEAU_MAX) return;
-    if (deborde(el.querySelector('.maman__droite')) || deborde(el.querySelector('.maman__note'))) {
-      setReduction({ signature, niveau: niveau + 1 });
-    }
+    if (!el || niveau >= PALIERS.length - 1) return;
+    const zones = ['.maman__agenda', '.maman__gauche', '.maman__note', '.aujourdhui', '.semaine'];
+    if (zones.some((z) => deborde(el.querySelector(z)))) setReduction({ signature, niveau: niveau + 1 });
   });
 
-  // Une rotation ou un changement de taille d'écran relance le calcul.
   useLayoutEffect(() => {
     const el = racine.current;
     if (!el || typeof ResizeObserver === 'undefined') return undefined;
@@ -58,24 +71,42 @@ export default function AffichageMaman({ maintenant, donnees, apercu = false, no
     return () => obs.disconnect();
   }, []);
 
+  const classes = ['maman', apercu && 'maman--apercu',
+    palier('aujourdhui-dense') && 'maman--jour-dense',
+    palier('semaine-dense') && 'maman--semaine-dense',
+    palier('note-reduite') && 'maman--note-reduite'].filter(Boolean).join(' ');
+
   return (
-    <div ref={racine} className={`maman${apercu ? ' maman--apercu' : ''}${niveau >= 4 ? ' maman--note-reduite' : ''}`} aria-live="off">
+    <div ref={racine} className={classes} aria-live="off">
       <div className="maman__cadre">
-        <section className="maman__temps">
-          <p className="maman__jour">{majuscule(nomJour(jour))}</p>
-          <p className="maman__date">{dateLongue(jour)}</p>
-          <p className="maman__heure">{horlogeLisible(maintenant)}</p>
-          <p className="maman__moment">C'est {momentDeLaJournee(maintenant)}</p>
+        {/* Colonne de gauche : heure, date, note */}
+        <section className="maman__gauche">
+          <div className="maman__temps">
+            <p className="maman__jour">{majuscule(nomJour(jour))}</p>
+            <p className="maman__date">{dateLongue(jour)}</p>
+            <p className="maman__heure">{horlogeLisible(maintenant)}</p>
+            <p className="maman__moment">C'est {momentDeLaJournee(maintenant)}</p>
+          </div>
+          {aUneNote && (
+            <div className="maman__note">
+              {note.titre?.trim() && <p className="note__titre">{note.titre}</p>}
+              {note.texte?.trim() && <p className="note__texte">{note.texte}</p>}
+            </div>
+          )}
         </section>
 
-        <section className="maman__droite">
-          <div className={`maman__rdvs ${densite}`}>
-            <h2 className="maman__titre-section">Aujourd'hui</h2>
-            {rdvs.length === 0 ? (
+        {/* Colonne de droite : aujourd'hui en grand, puis les 6 jours suivants */}
+        <section className="maman__agenda">
+          <div className="aujourdhui" style={styleJour(jourSemaine(jour))}>
+            <h2 className="aujourdhui__titre">
+              <span className="pastille">Aujourd'hui</span>
+              <span>{nomJour(jour)} {decomposer(jour).j === 1 ? '1er' : decomposer(jour).j}</span>
+            </h2>
+            {rdvsJour.length === 0 ? (
               <p className="maman__aucun">Pas de rendez-vous aujourd'hui</p>
             ) : (
               <ul className="maman__liste">
-                {rdvs.map((r) => (
+                {rdvsJour.map((r) => (
                   <li key={r.cle} className={`rdv rdv--${r.etat}`}>
                     {(r.etat === 'prochain' || r.etat === 'en-cours') && (
                       <span className="rdv__etiquette">
@@ -93,12 +124,32 @@ export default function AffichageMaman({ maintenant, donnees, apercu = false, no
             )}
           </div>
 
-          {aUneNote && (
-            <div className="maman__note">
-              {note.titre?.trim() && <p className="note__titre">{note.titre}</p>}
-              {note.texte?.trim() && <p className="note__texte">{note.texte}</p>}
-            </div>
-          )}
+          <ul className="semaine">
+            {suivants.map(({ jour: j, rdvs }) => {
+              const affiches = rdvs.slice(0, maxParJour);
+              const reste = rdvs.length - affiches.length;
+              return (
+                <li key={j} className="semaine__jour" style={styleJour(jourSemaine(j))}>
+                  <span className="semaine__nom">
+                    {j === ajouterJours(jour, 1) ? 'Demain' : majuscule(nomJour(j))}
+                    <span className="semaine__num"> {decomposer(j).j === 1 ? '1er' : decomposer(j).j}</span>
+                  </span>
+                  <span className="semaine__rdvs">
+                    {rdvs.length === 0 ? <span className="semaine__rien">Rien de prévu</span> : (
+                      <>
+                        {affiches.map((r) => (
+                          <span key={r.cle} className="semaine__rdv">
+                            <strong>{heureLisible(r.heure_debut)}</strong> {r.titre}
+                          </span>
+                        ))}
+                        {reste > 0 && <span className="semaine__reste">et {reste} autre{reste > 1 ? 's' : ''}</span>}
+                      </>
+                    )}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </section>
       </div>
       {nonRelie && <p className="maman__non-relie">Appareil à relier</p>}

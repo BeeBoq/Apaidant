@@ -13,6 +13,8 @@ const db = new PGlite();
 await db.exec(`create role anon nologin; create role authenticated nologin;`);
 await db.exec(fs.readFileSync('./supabase/migrations/001_schema.sql', 'utf8'));
 await db.exec(`grant usage on schema public to anon;`);
+// Le scénario se déroule fin octobre 2026 : on fige la date « serveur » en conséquence.
+await db.exec(`create or replace function public._aujourdhui() returns date language sql stable as $$ select date '2026-10-25' $$;`);
 const jA = (await db.query(`select admin_creer_acces_aidant('famille') j`)).rows[0].j;
 const jT = (await db.query(`select admin_creer_appareil('Tablette salon') j`)).rows[0].j;
 await db.query(`select admin_creer_appareil('Téléphone de Maman')`);
@@ -131,7 +133,10 @@ assert.match(texte, /26 octobre 2026/);
 assert.match(texte, /13 h 05/);
 assert.match(texte, /Prochain rendez-vous/);
 assert.match(texte, /Bonjour Maman/);
-assert.ok(!texte.includes('Coiffeur'));
+// v2 : semaine glissante — le coiffeur de mardi figure sur la ligne « Demain »
+assert.match(texte, /Demain 27\s*10 h Coiffeur/);
+assert.match(texte, /Aujourd'hui[\s\S]*Dentiste[\s\S]*Demain/);
+assert.match(texte, /Dimanche 1er\s*Rien de prévu/); // 7e jour de la semaine glissante
 
 // Un toucher ne déclenche rien
 const urlAvant = pT.url();
