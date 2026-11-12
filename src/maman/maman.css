@@ -125,6 +125,9 @@
 .maman__non-relie { position: absolute; left: 50%; bottom: 2cqmin; transform: translateX(-50%); width: min(92%, 70em);
                      font-size: 2.6cqmin; line-height: 1.35; text-align: center; color: #3d3d3d;
                      background: #ece7dc; border: 0.3cqmin solid #c9c0ae; border-radius: 1.2cqmin; padding: 1.2cqmin 2cqmin; }
+.maman__non-relie p { margin: 0; }
+.maman__relier { display: inline-block; margin-top: 1cqmin; padding: 1cqmin 3cqmin; border-radius: 1cqmin;
+                 background: #161616; color: #fff; font-weight: 700; text-decoration: none; cursor: pointer; }
 
 /* --- Écran en hauteur (téléphone, tablette tournée) --- */
 @container (max-aspect-ratio: 1/1) {

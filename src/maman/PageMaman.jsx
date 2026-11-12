@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import AffichageMaman from './AffichageMaman.jsx';
 import { lire, ecrire, demanderStockagePersistant } from '../lib/stockage.js';
 import { synchroniserAppareil } from '../lib/api.js';
-import { appliquerSiLaNuit } from '../lib/miseAJour.js';
+import { appliquerSiLaNuit, appliquerSansAttendre } from '../lib/miseAJour.js';
 import { INTERVALLE_SYNCHRO_MS } from '../config.js';
 
 export default function PageMaman() {
@@ -12,6 +12,8 @@ export default function PageMaman() {
   const [donnees, setDonnees] = useState(null);
   const [jeton, setJeton] = useState(undefined); // undefined = pas encore lu
   const synchroEnCours = useRef(false);
+  const jetonRef = useRef(undefined);
+  jetonRef.current = jeton;
 
   // 1. Lecture de la copie locale au démarrage
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function PageMaman() {
       const d = new Date();
       setMaintenant(d);
       appliquerSiLaNuit(d);
+      if (jetonRef.current === null) appliquerSansAttendre();
       minuterie = setTimeout(tic, 60000 - (d.getSeconds() * 1000 + d.getMilliseconds()) + 50);
     };
     tic();

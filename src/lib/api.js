@@ -17,7 +17,10 @@ const MESSAGES = {
   reseau: 'Pas de connexion Internet. Réessayez dans un moment.',
 };
 
-export function messageErreur(err) {
+export function messageErreur(err, contexte) {
+  if (contexte === 'appareil' && err?.code === 'acces_refuse') {
+    return "Code refusé. Il faut un code d'appareil, créé dans Supabase avec select admin_creer_appareil('Tablette salon'); — le code aidant ne fonctionne pas ici. Un code d'appareil révoqué ne fonctionne plus non plus.";
+  }
   return MESSAGES[err?.code] || "Une erreur s'est produite. Réessayez.";
 }
 

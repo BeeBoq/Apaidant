@@ -11,7 +11,7 @@ export default function Appairage() {
 
   const relier = async (jeton) => {
     setEtat({ statut: 'en-cours' });
-    if (!jeton) { setEtat({ statut: 'erreur', message: "Lien incomplet : le code après « # » est absent ou tronqué." }); return; }
+    if (!jeton) { setEtat({ statut: 'saisie' }); return; }
     try {
       const r = await synchroniserAppareil(jeton);
       await ecrire('jeton-appareil', jeton);
@@ -19,7 +19,7 @@ export default function Appairage() {
       await demanderStockagePersistant();
       setEtat({ statut: 'ok', nom: r.appareil });
     } catch (err) {
-      setEtat({ statut: 'erreur', message: messageErreur(err) });
+      setEtat({ statut: 'erreur', message: messageErreur(err, 'appareil') });
     }
   };
 
@@ -35,17 +35,19 @@ export default function Appairage() {
     <main className="aidant aidant--etroit">
       <h1>Relier cet appareil</h1>
       {etat.statut === 'en-cours' && <p>Vérification du lien…</p>}
-      {etat.statut === 'erreur' && (
+      {(etat.statut === 'erreur' || etat.statut === 'saisie') && (
         <>
-          <p className="alerte">{etat.message}</p>
-          <SaisieLien onValider={relier} libelle="Collez ici le lien d'appairage de cet appareil (ou le code seul)" />
+          {etat.statut === 'erreur'
+            ? <p className="alerte">{etat.message}</p>
+            : <p>Collez le code d'appareil obtenu dans Supabase avec <code>select admin_creer_appareil('Tablette salon');</code></p>}
+          <SaisieLien onValider={relier} libelle="Code d'appareil (ou lien d'appairage complet)" />
         </>
       )}
       {etat.statut === 'ok' && (
         <>
           <p className="succes">Cet appareil est relié : <strong>{etat.nom}</strong>.</p>
           <ol className="etapes">
-            <li>Dans le menu de Chrome (⋮), choisissez <strong>Ajouter à l'écran d'accueil</strong> ou <strong>Installer l'application</strong>.</li>
+            <li>Si la page n'est pas déjà installée : menu de Chrome (⋮) → <strong>Ajouter à l'écran d'accueil</strong> ou <strong>Installer l'application</strong> (sur iPad / iPhone : bouton Partager → <strong>Sur l'écran d'accueil</strong>, puis relier l'appareil une seconde fois depuis l'icône, avec le bouton « Relier cet appareil »).</li>
             <li>Ouvrez « Maman » depuis l'écran d'accueil : la page s'affiche en plein écran.</li>
             <li>Sur la tablette, activez dans Android l'option <em>Rester activé pendant la charge</em> (options pour les développeurs) et, si besoin, l'épinglage d'écran.</li>
           </ol>
