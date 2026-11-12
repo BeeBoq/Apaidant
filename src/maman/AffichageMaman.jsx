@@ -14,9 +14,9 @@ const PALIERS = [
   'complet',
   'un-seul-passe',     // aujourd'hui : on ne garde que le dernier rendez-vous passé
   'aucun-passe',       // aujourd'hui : on retire les rendez-vous passés
-  'semaine-resumee',   // jours suivants : 1 rendez-vous affiché + « et 2 autres »
+  'semaine-dense',     // jours suivants : taille légèrement réduite
   'aujourdhui-dense',  // aujourd'hui : rendez-vous en taille réduite
-  'semaine-dense',     // jours suivants : taille réduite
+  'semaine-resumee',   // jours suivants : 1 rendez-vous affiché + « et 2 autres »
   'note-reduite',      // note en taille réduite
 ];
 

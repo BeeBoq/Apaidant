@@ -27,7 +27,7 @@
 
 .maman__cadre {
   display: grid;
-  grid-template-columns: 36% 1fr;
+  grid-template-columns: 27% 1fr;
   gap: 3cqw;
   height: 100%;
   padding: 3.5cqh 3cqw;
@@ -37,11 +37,11 @@
 /* --- Gauche : date, heure, note --- */
 .maman__gauche { display: flex; flex-direction: column; gap: 3cqmin; min-height: 0; overflow: hidden; }
 .maman__temps { flex: 0 0 auto; }
-.maman__jour   { font-size: min(10cqmin, 5.6cqw); font-weight: 700; line-height: 1.05; }
-.maman__date   { font-size: min(6cqmin, 3.4cqw); line-height: 1.2; margin-top: 0.8cqmin; }
-.maman__heure  { font-size: min(17cqmin, 8.6cqw); font-weight: 700; line-height: 1; margin-top: 3cqmin;
+.maman__jour   { font-size: min(7.4cqmin, 4.2cqw); font-weight: 700; line-height: 1.05; }
+.maman__date   { font-size: min(4.6cqmin, 2.6cqw); line-height: 1.2; margin-top: 0.8cqmin; }
+.maman__heure  { font-size: min(9.5cqmin, 5.6cqw); font-weight: 700; line-height: 1; margin-top: 2cqmin;
                  font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; }
-.maman__moment { font-size: min(5.6cqmin, 3.2cqw); color: var(--doux); margin-top: 2cqmin; }
+.maman__moment { font-size: min(4.4cqmin, 2.5cqw); color: var(--doux); margin-top: 1.2cqmin; }
 
 .maman__note {
   flex: 0 1 auto;
@@ -53,10 +53,10 @@
   border-radius: 1.6cqmin;
   padding: 2.2cqmin 2.6cqmin;
 }
-.note__titre { font-size: 5.2cqmin; font-weight: 700; line-height: 1.15; }
-.note__texte { font-size: 4.5cqmin; line-height: 1.3; margin-top: 1cqmin; white-space: pre-line; overflow-wrap: anywhere; }
-.maman--note-reduite .note__titre { font-size: 4.4cqmin; }
-.maman--note-reduite .note__texte { font-size: 3.8cqmin; }
+.note__titre { font-size: 4.8cqmin; font-weight: 700; line-height: 1.15; }
+.note__texte { font-size: 4.2cqmin; line-height: 1.3; margin-top: 1cqmin; white-space: pre-line; overflow-wrap: anywhere; }
+.maman--note-reduite .note__titre { font-size: 4cqmin; }
+.maman--note-reduite .note__texte { font-size: 3.5cqmin; }
 
 /* --- Droite : aujourd'hui puis la semaine --- */
 .maman__agenda { display: flex; flex-direction: column; gap: 2cqmin; min-height: 0; overflow: hidden; }
@@ -70,10 +70,10 @@
   border-radius: 2cqmin;
   padding: 1.8cqmin 2.4cqmin 2.2cqmin;
 }
-.aujourdhui__titre { display: flex; align-items: center; gap: 2cqmin; font-size: 5cqmin; font-weight: 700;
+.aujourdhui__titre { display: flex; align-items: center; gap: 2cqmin; font-size: 5.8cqmin; font-weight: 700;
                      margin-bottom: 1.6cqmin; }
 .pastille { background: var(--texte); color: #fff; border-radius: 999px; padding: 0.4cqmin 2.2cqmin; }
-.maman__aucun { font-size: 5.4cqmin; color: var(--doux); }
+.maman__aucun { font-size: 6cqmin; color: var(--doux); }
 .maman__liste { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1.2cqmin; }
 
 .rdv {
@@ -87,12 +87,12 @@
   border-left: 1cqmin solid transparent;
   border-radius: 1cqmin;
 }
-.rdv__etiquette { grid-area: etiquette; font-size: calc(3.4cqmin * var(--t)); font-weight: 700; margin-bottom: 0.3cqmin; }
-.rdv__heure { grid-area: heure; font-size: calc(5.6cqmin * var(--t)); font-weight: 700; white-space: nowrap;
+.rdv__etiquette { grid-area: etiquette; font-size: calc(3.9cqmin * var(--t)); font-weight: 700; margin-bottom: 0.3cqmin; }
+.rdv__heure { grid-area: heure; font-size: calc(6.2cqmin * var(--t)); font-weight: 700; white-space: nowrap;
               font-variant-numeric: tabular-nums; }
 .rdv__texte { grid-area: texte; display: flex; flex-direction: column; min-width: 0; }
-.rdv__titre { font-size: calc(5.6cqmin * var(--t)); line-height: 1.15; overflow-wrap: anywhere; }
-.rdv__lieu  { font-size: calc(3.9cqmin * var(--t)); color: var(--doux); line-height: 1.2; margin-top: 0.3cqmin; }
+.rdv__titre { font-size: calc(6.2cqmin * var(--t)); line-height: 1.15; overflow-wrap: anywhere; }
+.rdv__lieu  { font-size: calc(4.5cqmin * var(--t)); color: var(--doux); line-height: 1.2; margin-top: 0.3cqmin; }
 /* Prochain rendez-vous : carte blanche bordée de noir (indépendante de la couleur du jour) */
 .rdv--prochain, .rdv--en-cours { background: #fff; border-left-color: var(--texte); }
 .rdv--passe { opacity: 0.4; }
@@ -106,7 +106,7 @@
   grid-template-columns: 6.9em 1fr;   /* « Dimanche 1er » tient sur une ligne */
   align-items: baseline;
   column-gap: 0.6em;
-  font-size: calc(4.3cqmin * var(--s));
+  font-size: calc(4.7cqmin * var(--s));
   background: var(--jour-teinte);
   border-left: 2.2cqmin solid var(--jour-vive);
   border-radius: 1cqmin;
@@ -119,7 +119,7 @@
                  line-height: 1.2; min-width: 0; }
 .semaine__rdv { overflow-wrap: anywhere; }
 .semaine__rien, .semaine__reste { color: var(--doux); }
-.maman--semaine-dense .semaine__jour { --s: 0.84; padding-block: 0.5cqmin; }
+.maman--semaine-dense .semaine__jour { --s: 0.93; padding-block: 0.6cqmin; }
 .maman--semaine-dense .semaine { gap: 0.6cqmin; }
 
 .maman__non-relie { position: absolute; bottom: 1cqmin; right: 2cqmin; font-size: 2.2cqmin; color: #9a9a9a; }
@@ -128,16 +128,16 @@
 @container (max-aspect-ratio: 1/1) {
   .maman__cadre { grid-template-columns: 1fr; grid-template-rows: auto 1fr; gap: 2cqh; padding: 3cqh 4cqw; }
   .maman__gauche { display: grid; grid-template-columns: 1fr; gap: 1.5cqh; }
-  .maman__jour   { font-size: 9cqmin; }
-  .maman__date   { font-size: 6cqmin; }
-  .maman__heure  { font-size: 17cqmin; margin-top: 1.5cqmin; }
-  .maman__moment { font-size: 5.6cqmin; margin-top: 1cqmin; }
+  .maman__jour   { font-size: 7cqmin; }
+  .maman__date   { font-size: 5cqmin; }
+  .maman__heure  { font-size: 10cqmin; margin-top: 1cqmin; }
+  .maman__moment { font-size: 4.6cqmin; margin-top: 0.6cqmin; }
   .maman__note { margin-top: 0; }
   .note__titre { font-size: 6cqmin; }
   .note__texte { font-size: 5.2cqmin; }
   .aujourdhui__titre { font-size: 6cqmin; }
   .rdv__etiquette { font-size: calc(4.2cqmin * var(--t)); }
-  .rdv__heure, .rdv__titre { font-size: calc(6.6cqmin * var(--t)); }
+  .rdv__heure, .rdv__titre { font-size: calc(6.2cqmin * var(--t)); }
   .rdv__lieu { font-size: calc(5cqmin * var(--t)); }
   .maman__aucun { font-size: 6cqmin; }
   .semaine__jour { font-size: calc(5cqmin * var(--s)); }
